@@ -13,7 +13,7 @@ import (
 const maxWorkers = 5
 
 func main() {
-	urls := []string{"https://golang.org", "https://go.dev/tour", "https://go.dev/ref/spec"}
+	urls := []string{"https://golang.org", "https://go.dev/tour", "https://go.dev/ref/spec", "https://golang.org", "https://go.dev/tour", "https://go.dev/ref/spec", "https://golang.org", "https://go.dev/tour", "https://go.dev/ref/spec", "https://golang.org", "https://go.dev/tour", "https://go.dev/ref/spec", "https://golang.org", "https://go.dev/tour", "https://go.dev/ref/spec", "https://golang.org", "https://go.dev/tour", "https://go.dev/ref/spec", "https://golang.org", "https://go.dev/tour", "https://go.dev/ref/spec", "https://golang.org", "https://go.dev/tour", "https://go.dev/ref/spec", "https://golang.org", "https://go.dev/tour", "https://go.dev/ref/spec", "https://golang.org", "https://go.dev/tour", "https://go.dev/ref/spec", "https://golang.org", "https://go.dev/tour", "https://go.dev/ref/spec", "https://golang.org", "https://go.dev/tour", "https://go.dev/ref/spec", "https://golang.org", "https://go.dev/tour", "https://go.dev/ref/spec", "https://golang.org", "https://go.dev/tour", "https://go.dev/ref/spec", "https://golang.org", "https://go.dev/tour", "https://go.dev/ref/spec", "https://golang.org", "https://go.dev/tour", "https://go.dev/ref/spec"}
 	wg := sync.WaitGroup{}
 	taskChan := make(chan string, maxWorkers)
 	resultChan := make(chan int)
@@ -24,6 +24,13 @@ func main() {
 			DisableKeepAlives: true,
 		},
 	}
+	var total int
+
+	go func() {
+		for i := 0; i < len(urls); i++ {
+			total += <- resultChan
+		}
+	}()
 
 	workersNum := len(urls)
 	if workersNum > 5 {
@@ -34,14 +41,10 @@ func main() {
 		go worker(&wg, taskChan, resultChan, &httpClient)
 	}
 
-	var total int
 	for _, url := range urls {
 		taskChan <- url
 	}
 	close(taskChan)
-	for i := 0; i < len(urls); i++ {
-		total += <- resultChan
-	}
 	wg.Wait()
 	close(resultChan)
 	fmt.Println("Total: ", total)
